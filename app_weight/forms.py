@@ -56,15 +56,9 @@ class FileForm(Form):
 
         try:
             content = file.read().decode("utf-8-sig")
-            reader = csv.DictReader(
-                io.StringIO(content),
-                delimiter=";",
-                strict=True,
-            )
+            reader = csv.DictReader(io.StringIO(content), delimiter=";", strict=True)
 
-            if reader.fieldnames != [
-                "date", "morning", "evening", "comment"
-            ]:
+            if reader.fieldnames != ["date", "morning", "evening", "comment"]:
                 raise ValidationError(
                     "Неверный формат CSV. Ожидаются поля: "
                     "date;morning;evening;comment"
@@ -72,14 +66,10 @@ class FileForm(Form):
 
             for row in reader:
                 if None in row or any(value is None for value in row.values()):
-                    raise ValidationError(
-                        "Некорректное количество столбцов в CSV."
-                    )
+                    raise ValidationError("Некорректное количество столбцов в CSV.")
 
         except (UnicodeDecodeError, csv.Error) as exc:
-            raise ValidationError(
-                "Не удалось прочитать CSV-файл в кодировке UTF-8."
-            ) from exc
+            raise ValidationError("Не удалось прочитать CSV-файл в кодировке UTF-8.") from exc
 
         finally:
             file.seek(0)

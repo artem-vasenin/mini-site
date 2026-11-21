@@ -1,4 +1,7 @@
 import csv
+import io
+from datetime import datetime
+
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.http import HttpResponseRedirect, HttpResponseNotFound
@@ -16,14 +19,15 @@ def create(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         form = WeightForm(request.POST)
         if form.is_valid():
-            user = request.user
-            w = Weight()
-            w.date = form.cleaned_data['date']
-            w.morning = form.cleaned_data['morning']
-            w.evening = form.cleaned_data['evening']
-            w.comment = form.cleaned_data['comment']
-            w.user = user
-            w.save()
+            _, _created = Weight.objects.update_or_create(
+                user=request.user,
+                date=form.cleaned_data['date'],
+                defaults={
+                    'morning': form.cleaned_data['morning'],
+                    'evening': form.cleaned_data['evening'],
+                    'comment': form.cleaned_data['comment'],
+                },
+            )
         return HttpResponseRedirect('/weight/')
     return render(request, 'app_weight/create.html', {'form': WeightForm()})
 
@@ -33,7 +37,14 @@ def file(request: HttpRequest) -> HttpResponse:
         form = FileForm(request.POST, request.FILES)
         if form.is_valid():
             data = form.cleaned_data['data']
-            print(data.name)
+            text = io.TextIOWrapper(data.file, encoding="utf-8-sig", newline="")
+            reader = csv.DictReader(text, delimiter=';')
+            for r in reader:
+                date = datetime.strptime(r['date'], '%Y-%m-%d').date()
+                morning = float(r['morning']) if r['morning'] else None
+                evening = float(r['evening']) if r['evening'] else None
+                comment = r['comment'] if r['comment'] else None
+                print(date, morning, evening, comment)
     return render(
         request,
         'app_weight/file.html',
