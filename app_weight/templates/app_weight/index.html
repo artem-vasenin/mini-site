@@ -5,8 +5,29 @@
 {% block content %}
 <div class="container">
   <div class="row">
-    <div class="col">
+    <div class="col pt-3">
       <h1>Учет веса тела</h1>
+    </div>
+  </div>
+    <div class="row">
+      <div class="col pt-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:details' %}">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Вес</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  <div class="row">
+    <div class="col-12">
+      <a class="btn btn-primary" href="{% url 'weight:create' %}">Добавить данные</a>
+      <a class="btn btn-primary" href="{% url 'weight:file' %}">Импортировать данные</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 pt-3">
+      List
     </div>
   </div>
 </div>

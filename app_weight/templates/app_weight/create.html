@@ -1,0 +1,53 @@
+{% extends 'index.html' %}
+
+{% block title %}{{ block.super }} | Внести вес тела{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col pt-3">
+        <h1>Внести вес тела</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col pt-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:details' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'weight:details' %}">Вес</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Добавить вес</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <form method="post" action="{% url 'weight:create' %}" class="row g-3">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="col">
+              <div class="alert alert-danger" role="alert">
+                {{ form.non_field_errors }}
+              </div>
+            </div>
+          {% endif %}
+
+          {% for field in form %}
+            <div class="col-12">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+              {{ field }}
+              {% for error in field.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+
+          <div class="col-12">
+            <button class="btn btn-primary" type="submit">Добавить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -8,8 +8,8 @@ class Weight(models.Model):
         db_table = 'weight'
         ordering = ['-created_at']
 
-    morning=models.IntegerField(null=True, blank=True)
-    evening=models.IntegerField(null=True, blank=True)
+    morning=models.FloatField(null=True, blank=True)
+    evening=models.FloatField(null=True, blank=True)
     comment=models.CharField(max_length=255, null=True, blank=True)
     date=models.DateField(default=timezone.now)
     created_at=models.DateTimeField(auto_now_add=True)
