@@ -1,0 +1,86 @@
+{% extends 'index.html' %}
+
+{% block title %}{{ block.super }} | Удалить запись{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col pt-3">
+        <h1>Удалить запись</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col pt-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home:details' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'weight:details' %}">Вес</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Удалить запись</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col pt-3">
+        <table class="table table-striped table-dark mb-0">
+          <thead>
+          <tr>
+            <th scope="col">День</th>
+            <th scope="col">Утро</th>
+            <th scope="col">Вечер</th>
+            <th scope="col">Комментарий</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <th scope="row">{{ data.date }}</th>
+            <td>
+              {% if not data.morning %}
+                <span class="badge text-bg-secondary">Не заполнено</span>
+              {% elif data.morning > 92 %}
+                <span class="badge text-bg-danger">{{ data.morning }}</span>
+              {% elif data.morning > 90 %}
+                <span class="badge text-bg-warning">{{ data.morning }}</span>
+              {% elif data.morning > 88 %}
+                <span class="badge text-bg-info">{{ data.morning }}</span>
+              {% else %}
+                <span class="badge text-bg-success">{{ data.morning }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not data.evening %}
+                <span class="badge text-bg-secondary">Не заполнено</span>
+              {% elif data.evening > 92 %}
+                <span class="badge text-bg-danger">{{ data.evening }}</span>
+              {% elif data.evening > 90 %}
+                <span class="badge text-bg-warning">{{ data.evening }}</span>
+              {% elif data.evening > 88 %}
+                <span class="badge text-bg-info">{{ data.evening }}</span>
+              {% else %}
+                <span class="badge text-bg-success">{{ data.evening }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if not data.comment %}
+                <span class="badge text-bg-secondary">Не заполнено</span>
+              {% else %}
+                {{ data.comment }}
+              {% endif %}
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <form method="post" action="{% url 'weight:delete' data.id %}" class="row g-3">
+          {% csrf_token %}
+          <div class="col-12 pt-3">
+            <button class="btn btn-danger" type="submit">Удалить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

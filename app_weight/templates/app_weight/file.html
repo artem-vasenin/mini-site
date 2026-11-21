@@ -53,5 +53,24 @@
         </form>
       </div>
     </div>
+    <div class="row">
+      <div class="col pt-3">
+        {% if not parsed_cnt is None %}
+          <div class="alert alert-info" role="alert">
+            Добавлено {{ parsed_cnt }} записей
+          </div>
+        {% endif %}
+        {% if errors_cnt %}
+          <div class="alert alert-danger" role="alert">
+            <div>С ошибками {{ errors_cnt }} записей</div>
+            <ul>
+              {% for k, v in errors.items %}
+              <li>{{ v }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 {% endblock %}
