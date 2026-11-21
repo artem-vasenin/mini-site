@@ -1,6 +1,7 @@
 import csv
 import io
 from datetime import datetime
+from urllib import response
 
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
@@ -134,3 +135,29 @@ def delete(request: HttpRequest, pk: int) -> HttpResponse:
         w.delete()
         return HttpResponseRedirect('/weight/')
     return render(request, 'app_weight/delete.html', {'data': w})
+
+@login_required
+def export(request: HttpRequest) -> HttpResponse:
+    lst = Weight.objects.all().filter(user=request.user).order_by('-date')
+    response = HttpResponse(
+        content_type="text/csv; charset=utf-8",
+    )
+    response["Content-Disposition"] = (
+        'attachment; filename="weight.csv"'
+    )
+    response.write("\ufeff")
+    writer = csv.writer(response, delimiter=";")
+    writer.writerow([
+        "date", "morning", "evening", "comment"
+    ])
+
+    for w in lst:
+        writer.writerow([
+            w.date.isoformat(),
+            w.morning or '',
+            w.evening or '',
+            w.comment or '',
+        ])
+
+    return response
+
