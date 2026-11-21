@@ -1,7 +1,6 @@
 import csv
 import io
 from datetime import datetime
-from urllib import response
 
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
@@ -19,6 +18,7 @@ months = [
 def index(request: HttpRequest) -> HttpResponse:
     lst = Weight.objects.all().filter(user=request.user).order_by('-date', )
     result = {}
+    monthly_weights = {}
     for w in lst:
         y = w.date.year
         m = months[w.date.month-1]
@@ -29,7 +29,28 @@ def index(request: HttpRequest) -> HttpResponse:
             "evening": w.evening,
             "comment": w.comment,
         }
-    return render(request, 'app_weight/index.html', {'data': result})
+        weights = monthly_weights.setdefault(y, {}).setdefault(m, [])
+        weights.extend(weight for weight in (w.morning, w.evening) if weight is not None)
+
+    stats = {
+        year: {
+            month: {
+                'min': min(weights),
+                'max': max(weights),
+                'avg': round(sum(weights) / len(weights), 2),
+            }
+            for month, weights in month_data.items()
+        }
+        for year, month_data in monthly_weights.items()
+    }
+
+    for y, y_val in stats.items():
+        for m, m_val in y_val.items():
+            result[y][m]['stats'] = m_val
+
+    grid = {'max': 92, 'mid': 90, 'morm': 88, 'min': 86}
+
+    return render(request, 'app_weight/index.html', {'data': result, 'grid': grid})
 
 @login_required
 def create(request: HttpRequest) -> HttpResponse:
