@@ -1,11 +1,14 @@
 import csv
 import io
 from datetime import datetime
+import plotly.graph_objects as go
+from django.db.models import Avg, F
+from django.db.models.functions import Coalesce, TruncMonth
 
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
-from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect, HttpResponseNotFound
 
 from .forms import WeightForm, FileForm
 from .models import Weight
@@ -16,10 +19,59 @@ months = [
 
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
-    lst = Weight.objects.all().filter(user=request.user).order_by('-date', )
+    user = request.user
+    lst_desc = Weight.objects.all().filter(user=user).order_by('-date', )
+
+    def get_chart():
+        weights = (
+            Weight.objects
+            .filter(user=user)
+            .annotate(daily_weight=Coalesce(F('morning'), F('evening')))
+            .filter(daily_weight__isnull=False)
+            .annotate(month=TruncMonth("date"))
+            .order_by()
+            .values("month")
+            .annotate(avg_weight=Avg("daily_weight"))
+            .order_by("month")
+        )
+        months = []
+        averages = []
+
+        for row in weights:
+            try:
+                averages.append(float(row["avg_weight"]))
+                months.append(row["month"])
+            except Exception as e:
+                print(e)
+                continue
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=months,
+            y=averages,
+            mode="lines+markers",
+            name="Средний вес",
+        ))
+        fig.update_layout(
+            title="Средний вес по месяцам",
+            xaxis_title="Месяц",
+            yaxis_title="Вес (кг)",
+            template="plotly_white",
+            hovermode="x unified",
+            xaxis={
+                "tickformat": "%m.%Y",
+                "dtick": "M1",
+            },
+        )
+        chart = fig.to_html(
+            full_html=False,
+            include_plotlyjs=True,
+        )
+        return chart
+
     result = {}
     monthly_weights = {}
-    for w in lst:
+    for w in lst_desc:
         y = w.date.year
         m = months[w.date.month-1]
         d = w.date.day
@@ -50,7 +102,11 @@ def index(request: HttpRequest) -> HttpResponse:
 
     grid = {'max': 92, 'mid': 90, 'morm': 88, 'min': 86}
 
-    return render(request, 'app_weight/index.html', {'data': result, 'grid': grid})
+    return render(
+        request,
+        'app_weight/index.html',
+        {'data': result, 'grid': grid, 'chart': get_chart()},
+    )
 
 @login_required
 def create(request: HttpRequest) -> HttpResponse:

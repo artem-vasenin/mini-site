@@ -48,6 +48,11 @@
       </div>
     </div>
     <div class="row">
+      <div class="col">
+        {{ chart|safe }}
+      </div>
+    </div>
+    <div class="row">
       <div class="col-12 pt-3">
         {% for y, m in data.items %}
           <h3 class="pb-3">{{ y }}</h3>
