@@ -1,6 +1,12 @@
 <nav class="navbar sticky-top bg-dark navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
   <div class="container">
-    <a class="navbar-brand" href="{% url 'home:details' %}">Хлам</a>
+    <a class="navbar-brand" href="{% url 'home:details' %}">
+      {% if user.is_authenticated %}
+        {{ user.username }}
+      {% else %}
+        Всякое
+      {% endif %}
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
